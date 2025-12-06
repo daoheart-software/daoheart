@@ -1,6 +1,8 @@
-[package]
-name = "daoheart"
-version = "0.1.0"
-edition = "2024"
+[workspace]
 
-[dependencies]
+resolver = "3"
+
+members = [
+    "buffer", "editor_component", "global", "io", "main",
+    "window"
+]

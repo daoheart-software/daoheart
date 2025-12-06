@@ -1,0 +1,9 @@
+[package]
+name = "editor_component"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+buffer = { path = "../buffer" }
+global = { path = "../global" }
+xilem = "0.4.0"
