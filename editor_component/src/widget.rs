@@ -14,6 +14,7 @@ use xilem::masonry::{
 
 mod draw_widget;
 
+#[derive(Clone, Debug, Default)]
 pub struct EditorWidget {
     buffer: Buffer,
 }
