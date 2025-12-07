@@ -2,6 +2,7 @@ use std::io::{self, Read};
 
 use ropey::Rope;
 
+#[derive(Clone, Debug, Default)]
 pub struct Buffer {
     buffer: Rope,
 }
