@@ -6,4 +6,4 @@ edition = "2024"
 [dependencies]
 buffer = { path = "../buffer" }
 global = { path = "../global" }
-xilem = "0.4.0"
+xilem = { workspace = true }
