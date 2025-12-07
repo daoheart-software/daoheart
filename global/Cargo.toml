@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-xilem = "0.4.0"
+xilem = { workspace = true }

@@ -6,4 +6,4 @@ edition = "2024"
 [dependencies]
 editor_component = { path = "../editor_component" }
 io = { path = "../io" }
-xilem = "0.4.0"
+xilem = { workspace = true }

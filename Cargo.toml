@@ -1,8 +1,16 @@
+[package]
+name = "daoheart" # the name of the package
+version = "0.0.1"    # the current version, obeying semver
+edition = "2024"
+
 [workspace]
-
 resolver = "3"
-
 members = [
-    "buffer", "editor_component", "global", "io", "main",
-    "window"
+    "buffer", "editor_component", "global", "io", "window"
 ]
+
+[workspace.dependencies]
+xilem = { version = "0.4.0" }
+
+[dependencies]
+window = { path = "window" }
