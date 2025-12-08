@@ -1,9 +1,8 @@
 use std::cell::RefCell;
-use xilem::masonry::core::BrushIndex;
-use xilem::masonry::parley::FontContext;
-use xilem::masonry::parley::LayoutContext;
+
+use cosmic_text::{FontSystem, SwashCache};
 
 thread_local! {
-    pub static FONT_CTX: RefCell<FontContext> = RefCell::new(FontContext::new());
-    pub static LAYOUT_CTX: RefCell<LayoutContext<BrushIndex>> = RefCell::new(LayoutContext::new());
+    pub static FONT_SYSTEM: RefCell<FontSystem> = RefCell::new(FontSystem::new());
+    pub static SWASH_CACHE: RefCell<SwashCache> = RefCell::new(SwashCache::new());
 }

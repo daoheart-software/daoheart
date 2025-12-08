@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-xilem = { workspace = true }
+cosmic-text = { workspace = true }

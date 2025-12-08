@@ -1,9 +1,0 @@
-[package]
-name = "window"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-editor_component = { path = "../editor_component" }
-io = { path = "../io" }
-xilem = { workspace = true }

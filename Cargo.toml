@@ -6,11 +6,14 @@ edition = "2024"
 [workspace]
 resolver = "3"
 members = [
-    "buffer", "editor_component", "global", "io", "window"
+    "buffer", "editor_widget", "global", "io",
 ]
 
 [workspace.dependencies]
-xilem = { version = "0.4.0" }
+iced = { version = "0.14.0", flags = "advanced" }
+iced_core = "0.14.0"
+cosmic-text = "0.15.0"
 
 [dependencies]
-window = { path = "window" }
+iced = { workspace = true }
+editor_widget = { path = "./editor_widget" }
