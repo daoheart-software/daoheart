@@ -10,10 +10,17 @@ members = [
 ]
 
 [workspace.dependencies]
-iced = { version = "0.14.0", flags = "advanced" }
+iced = { version = "0.14.0", features = ["advanced"] }
 iced_core = "0.14.0"
 cosmic-text = "0.15.0"
+ropey = "1.6.1"
 
 [dependencies]
+ropey = { workspace = true }
 iced = { workspace = true }
 editor_widget = { path = "./editor_widget" }
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+

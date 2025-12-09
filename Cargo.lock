@@ -649,6 +649,7 @@ version = "0.0.1"
 dependencies = [
  "editor_widget",
  "iced",
+ "ropey",
 ]
 
 [[package]]
@@ -706,6 +707,7 @@ dependencies = [
  "global",
  "iced",
  "iced_core",
+ "ropey",
 ]
 
 [[package]]

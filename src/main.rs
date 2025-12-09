@@ -1,32 +1,34 @@
-use std::env::args;
+use std::{env::args, fs::File, path::Path, sync::Arc};
 
-use editor_widget::EditorWidget;
-use iced::{
-    Element,
-    widget::{column, text},
-};
+use editor_widget::{EditorWidget, message::EditorMessage, state::EditorState};
+use iced::Element;
+use ropey::Rope;
 
-struct Application {}
+#[derive(Debug)]
+struct Application {
+    es: EditorState,
+}
 
-enum ApplicationMessage {}
+#[derive(Debug)]
+enum ApplicationMessage {
+    EditorMessage(EditorMessage),
+}
 
 impl Application {
     fn new() -> Self {
-        Self {}
+        let arg = args().nth(1).expect("to have a single argument");
+        Self {
+            es: EditorState::new(
+                Some(Arc::from(Path::new(&arg))),
+                Rope::from_reader(File::open(Path::new(&arg)).unwrap()).unwrap(),
+            ),
+        }
     }
 
     fn update(&mut self, _message: ApplicationMessage) {}
 
     fn view(&self) -> Element<'_, ApplicationMessage> {
-        let arg = args()
-            .into_iter()
-            .skip(1)
-            .next()
-            .expect("to have a single argument");
-
-        let file = std::fs::File::open(arg).unwrap();
-
-        column![EditorWidget::new(file)].into()
+        Element::from(EditorWidget::new(&self.es)).map(ApplicationMessage::EditorMessage)
     }
 }
 

@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 buffer = { path = "../buffer" }
 global = { path = "../global" }
+ropey = { workspace = true }
 iced = { workspace = true }
 iced_core = { workspace = true }
 cosmic-text = { workspace = true }

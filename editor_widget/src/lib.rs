@@ -1,65 +1,75 @@
-use std::io::Read;
-
-use buffer::Buffer;
-use cosmic_text::{Attrs, FontSystem, Metrics};
+use cosmic_text::{Align, Attrs, Buffer, Metrics, Shaping};
 use global::{FONT_SYSTEM, SWASH_CACHE};
-use iced::{Background, Color, Element, Event, Length, Rectangle, Size};
-use iced_core::{
-    Clipboard, Layout, Shell, Widget,
-    layout::{Limits, Node},
-    mouse::Cursor,
-    renderer::{Quad, Style},
-    widget::Tree,
-};
+use iced::{Background, Border, Color, Element, Length, Rectangle};
+use iced_core::{Widget, layout::Node, renderer::Quad};
 
-pub struct EditorWidget {
+use crate::{message::EditorMessage, state::EditorState};
+
+pub mod message;
+pub mod state;
+
+pub struct EditorWidget<'a> {
+    _state: &'a EditorState,
     buffer: Buffer,
-    cosmic_buffer: cosmic_text::Buffer,
 }
-
-impl EditorWidget {
-    pub fn new(reader: impl Read) -> Self {
-        Self {
-            buffer: Buffer::from_reader(reader).unwrap(),
-            cosmic_buffer: cosmic_text::Buffer::new_empty(Metrics::new(24.0, 24.0)),
-        }
+impl<'a> EditorWidget<'a> {
+    pub fn new(state: &'a EditorState) -> Self {
+        FONT_SYSTEM.with_borrow_mut(|fs| {
+            let mut buffer = Buffer::new(fs, Metrics::new(24., 24.));
+            buffer.set_text(
+                fs,
+                &state.buffer().to_string(),
+                &Attrs::new(),
+                Shaping::Advanced,
+                Some(Align::Left),
+            );
+            Self {
+                _state: state,
+                buffer,
+            }
+        })
     }
 }
 
-impl<Message, Theme, Renderer> Widget<Message, Theme, Renderer> for EditorWidget
-where
-    Renderer: iced_core::Renderer,
+impl<'a, Theme, Renderer: iced_core::Renderer> Widget<EditorMessage, Theme, Renderer>
+    for EditorWidget<'a>
 {
-    fn size(&self) -> Size<Length> {
-        Size {
-            width: Length::Fill,
-            height: Length::Fill,
-        }
+    fn size(&self) -> iced::Size<iced::Length> {
+        iced::Size::new(Length::Fill, Length::Fill)
     }
 
-    fn layout(&mut self, _tree: &mut Tree, _renderer: &Renderer, limits: &Limits) -> Node {
-        self.build_buffer(limits.max());
+    fn layout(
+        &mut self,
+        _tree: &mut iced_core::widget::Tree,
+        _renderer: &Renderer,
+        limits: &iced_core::layout::Limits,
+    ) -> iced_core::layout::Node {
+        FONT_SYSTEM.with_borrow_mut(|fs| {
+            self.buffer
+                .set_size(fs, Some(limits.max().width), Some(limits.max().height));
+            self.buffer.shape_until_scroll(fs, true);
+        });
         Node::new(limits.max())
     }
 
     fn draw(
         &self,
-        _tree: &Tree,
-        _renderer: &mut Renderer,
+        _tree: &iced_core::widget::Tree,
+        renderer: &mut Renderer,
         _theme: &Theme,
-        _style: &Style,
-        _layout: Layout<'_>,
-        _cursor: Cursor,
-        _viewport: &Rectangle,
+        _style: &iced_core::renderer::Style,
+        _layout: iced_core::Layout<'_>,
+        _cursor: iced_core::mouse::Cursor,
+        _viewport: &iced::Rectangle,
     ) {
-        FONT_SYSTEM.with_borrow_mut(|font_system| {
-            SWASH_CACHE.with_borrow_mut(|cache| {
-                self.cosmic_buffer.draw(
-                    font_system,
-                    cache,
-                    cosmic_text::Color::rgb(255, 255, 255),
+        FONT_SYSTEM.with_borrow_mut(|fs| {
+            SWASH_CACHE.with_borrow_mut(|sc| {
+                self.buffer.draw(
+                    fs,
+                    sc,
+                    cosmic_text::Color::rgb(200, 0, 10),
                     |x, y, w, h, color| {
-                        _renderer.fill_quad(
+                        renderer.fill_quad(
                             Quad {
                                 bounds: Rectangle {
                                     x: x as f32,
@@ -67,69 +77,27 @@ where
                                     width: w as f32,
                                     height: h as f32,
                                 },
+                                border: Border::default(),
                                 ..Default::default()
                             },
-                            Background::Color(Color {
-                                r: color.r() as f32,
-                                g: color.g() as f32,
-                                b: color.b() as f32,
-                                a: color.a() as f32,
-                            }),
+                            Background::Color(Color::from_rgba8(
+                                color.r(),
+                                color.g(),
+                                color.b(),
+                                color.a() as f32,
+                            )),
                         );
                     },
                 );
             })
-        });
-    }
-
-    fn update(
-        &mut self,
-        _tree: &mut Tree,
-        _event: &Event,
-        _layout: Layout<'_>,
-        _cursor: Cursor,
-        _renderer: &Renderer,
-        _clipboard: &mut dyn Clipboard,
-        _shell: &mut Shell<'_, Message>,
-        _viewport: &Rectangle,
-    ) {
-    }
-}
-
-impl EditorWidget {
-    fn build_buffer(&mut self, size: Size<f32>) {
-        FONT_SYSTEM.with_borrow_mut(|font_system| {
-            self.do_build_buffer(font_system, size);
         })
     }
-
-    fn do_build_buffer(&mut self, font_system: &mut FontSystem, size: Size<f32>) {
-        let mut text = String::new();
-        for line in self.buffer.lines_at(0) {
-            text.push_str(line.as_str().unwrap_or(""));
-            text.push('\n');
-        }
-
-        self.cosmic_buffer
-            .set_size(font_system, Some(size.width), None);
-
-        self.cosmic_buffer.set_text(
-            font_system,
-            &text,
-            &Attrs::new(),
-            cosmic_text::Shaping::Advanced,
-            None,
-        );
-
-        self.cosmic_buffer.shape_until_scroll(font_system, true);
-    }
 }
 
-impl<'a, Message, Theme, Renderer> From<EditorWidget> for Element<'a, Message, Theme, Renderer>
-where
-    Renderer: iced_core::Renderer,
+impl<'a, Theme, Renderer: iced_core::Renderer> From<EditorWidget<'a>>
+    for Element<'a, EditorMessage, Theme, Renderer>
 {
-    fn from(widget: EditorWidget) -> Self {
-        Element::new(widget)
+    fn from(value: EditorWidget<'a>) -> Self {
+        Element::new(value)
     }
 }
