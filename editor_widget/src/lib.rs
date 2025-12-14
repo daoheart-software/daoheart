@@ -6,6 +6,7 @@ use iced_core::{Widget, layout::Node, renderer::Quad};
 use crate::{message::EditorMessage, state::EditorState};
 
 pub mod message;
+pub mod render_text_buffer;
 pub mod state;
 
 pub struct EditorWidget<'a> {
@@ -31,7 +32,7 @@ impl<'a> EditorWidget<'a> {
     }
 }
 
-impl<'a, Theme, Renderer: iced_core::Renderer> Widget<EditorMessage, Theme, Renderer>
+impl<'a, Renderer: iced_core::text::Renderer> Widget<EditorMessage, iced::Theme, Renderer>
     for EditorWidget<'a>
 {
     fn size(&self) -> iced::Size<iced::Length> {
@@ -56,46 +57,22 @@ impl<'a, Theme, Renderer: iced_core::Renderer> Widget<EditorMessage, Theme, Rend
         &self,
         _tree: &iced_core::widget::Tree,
         renderer: &mut Renderer,
-        _theme: &Theme,
+        theme: &iced::Theme,
         _style: &iced_core::renderer::Style,
-        _layout: iced_core::Layout<'_>,
+        layout: iced_core::Layout<'_>,
         _cursor: iced_core::mouse::Cursor,
         _viewport: &iced::Rectangle,
     ) {
         FONT_SYSTEM.with_borrow_mut(|fs| {
             SWASH_CACHE.with_borrow_mut(|sc| {
-                self.buffer.draw(
-                    fs,
-                    sc,
-                    cosmic_text::Color::rgb(200, 0, 10),
-                    |x, y, w, h, color| {
-                        renderer.fill_quad(
-                            Quad {
-                                bounds: Rectangle {
-                                    x: x as f32,
-                                    y: y as f32,
-                                    width: w as f32,
-                                    height: h as f32,
-                                },
-                                border: Border::default(),
-                                ..Default::default()
-                            },
-                            Background::Color(Color::from_rgba8(
-                                color.r(),
-                                color.g(),
-                                color.b(),
-                                color.a() as f32,
-                            )),
-                        );
-                    },
-                );
+                self.render_text_buffer(renderer, layout, fs, sc, theme);
             })
         })
     }
 }
 
-impl<'a, Theme, Renderer: iced_core::Renderer> From<EditorWidget<'a>>
-    for Element<'a, EditorMessage, Theme, Renderer>
+impl<'a, Renderer: iced_core::text::Renderer> From<EditorWidget<'a>>
+    for Element<'a, EditorMessage, iced::Theme, Renderer>
 {
     fn from(value: EditorWidget<'a>) -> Self {
         Element::new(value)
