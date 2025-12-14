@@ -1,8 +1,10 @@
-use std::{env::args, fs::File, path::Path, sync::Arc};
+use std::{env::args, path::Path, sync::Arc};
 
+use editor_widget::state::EditorStateInit;
 use editor_widget::{EditorWidget, message::EditorMessage, state::EditorState};
 use iced::Element;
-use ropey::Rope;
+
+mod constants;
 
 #[derive(Debug)]
 struct Application {
@@ -18,10 +20,10 @@ impl Application {
     fn new() -> Self {
         let arg = args().nth(1).expect("to have a single argument");
         Self {
-            es: EditorState::new(
-                Some(Arc::from(Path::new(&arg))),
-                Rope::from_reader(File::open(Path::new(&arg)).unwrap()).unwrap(),
-            ),
+            es: EditorState::new(EditorStateInit {
+                path: Some(Arc::from(Path::new(&arg))),
+                scroll_px: 0.0,
+            }),
         }
     }
 
