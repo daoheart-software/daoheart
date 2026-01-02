@@ -1,30 +1,25 @@
 use std::{path::Path, sync::Arc};
 
-use ropey::Rope;
-
 #[derive(Clone, Debug)]
 pub struct EditorState {
     /// The path of the file being read/written
     ///
     /// `None` if the file is in memory only.
-    path: Option<Arc<Path>>,
-    buffer: Rope,
+    pub(super) path: Option<Arc<Path>>,
+    pub(super) scroll_px: f32,
+}
+
+pub struct EditorStateInit {
+    pub path: Option<Arc<Path>>,
+    pub scroll_px: f32,
 }
 
 impl EditorState {
-    pub fn new(path: Option<Arc<Path>>, buffer: Rope) -> Self {
-        Self { path, buffer }
+    pub fn new(EditorStateInit { path, scroll_px }: EditorStateInit) -> Self {
+        Self { path, scroll_px }
     }
 
     pub fn path(&self) -> Option<&Path> {
         self.path.as_deref()
-    }
-
-    pub fn buffer(&self) -> &Rope {
-        &self.buffer
-    }
-
-    pub fn buffer_mut(&mut self) -> &mut Rope {
-        &mut self.buffer
     }
 }
